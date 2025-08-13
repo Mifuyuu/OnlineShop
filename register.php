@@ -96,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .register-title {
             color: #2c3e50;
-            font-weight: 700;
+            font-weight: 500;
             margin-bottom: 30px;
             text-align: center;
             font-family: 'LINE Seed Sans TH', sans-serif;
