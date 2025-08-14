@@ -9,12 +9,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = trim($_POST['password']);
     $confirm_password = trim($_POST['confirm_pass']);
 
-    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-    // นำข้อมูลบันทึกลงฐานข้อมูล
-    $sql = "INSERT INTO users(username, full_name, email, password, role) VALUES (?, ?, ?, ?, 'admin');";
+    // ตรวจสอบว่ากรอกข้อมูลมาครบหรือไม่
+    if (empty($username) || empty($fullname) || empty($email) || empty($password)) $error[] = 'กรุณากรอกข้อมูลให้ครบทุกช่อง';
+    elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) $error[] = 'กรุณากรอกอีเมลให้ถูกต้อง';
+    elseif ($password !== $confirm_password) $error[] = 'กรุณากรอกรหัสผ่านให้ตรงกัน';
+    else {
+        //ตรวจสอบว่ามีชื่อผู้ใช้หรืออีเมลถูกใช้ไปแล่้วหรือไม่
+        $sql = "SELECT * FROM users WHERE username = ? OR email = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([$username, $email]);
 
-    $stmt = $conn->prepare($sql);
-    $stmt->execute([$username, $fullname, $email, $hashedPassword]);
+        if ($stmt->rowCount() > 0) {
+            $error[] = 'ชื่อผู้ใช้หรืออีเมลนี้ถูกใช้ไปแล้ว';
+        }
+    }
+
+    // ถ้าไม่มี error
+    if (empty($error)) {
+
+        // เข้ารหัส
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+        // นำข้อมูลบันทึกลงฐานข้อมูล
+        $sql = "INSERT INTO users(username, full_name, email, password, role) VALUES (?, ?, ?, ?, 'member');";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([$username, $fullname, $email, $hashedPassword]);
+
+        // ถ้าบันทึกสำเร็จ ให้เปลี่ยนเส้นทางไปหน้า login
+        header('Location: login.php?register=success'); //เปลี่ยนเส้นทางไปหน้า login
+        exit(); //หยุดการทำงานของ script หลังจากเปลี่ยนเส้นทาง
+    }
 }
 ?>
 
@@ -125,35 +150,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
                 <div class="register-container p-4 p-md-5">
                     <h2 class="register-title">สมัครสมาชิก</h2>
+                    <?php if (!empty($error)): // ถ้ามีข้อผิดพลาด ให้แสดงข้อความ 
+                    ?>
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                <?php foreach ($error as $e): ?>
+                                    <li><?= htmlspecialchars($e) ?></li>
+                                    <!-- ใช ้ htmlspecialchars เพื่อป้องกัน XSS -->
+                                    <!-- < ? = คือ short echo tag ?> -->
+                                    <!-- ถ ้ำเขียนเต็ม จะได ้แบบด ้ำนล่ำง -->
+                                    <?php // echo "<li>" . htmlspecialchars($e) . "</li>"; 
+                                    ?>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                    <?php endif; ?>
                     <form action="" method="post">
                         <div class="row">
                             <div class="col-12 mb-3">
                                 <div class="form-floating">
-                                    <input type="text" name="user" id="user" placeholder="กรอกชื่อผู้ใช้" class="form-control" required>
+                                    <input type="text" name="user" id="user" placeholder="กรอกชื่อผู้ใช้" class="form-control" value="<?= isset($_POST['user']) ? htmlspecialchars($_POST['user']) : '' ?>">
                                     <label for="user">ชื่อผู้ใช้</label>
                                 </div>
                             </div>
                             <div class="col-12 mb-3">
                                 <div class="form-floating">
-                                    <input type="text" name="fullname" id="fullname" placeholder="กรอกชื่อ-นามสกุล" class="form-control" required>
+                                    <input type="text" name="fullname" id="fullname" placeholder="กรอกชื่อ-นามสกุล" class="form-control" value="<?= isset($_POST['fullname']) ? htmlspecialchars($_POST['fullname']) : '' ?>">
                                     <label for="fullname">ชื่อ-นามสกุล</label>
                                 </div>
                             </div>
                             <div class="col-12 mb-3">
                                 <div class="form-floating">
-                                    <input type="email" name="email" id="email" placeholder="กรอกอีเมล" class="form-control" required>
+                                    <input type="text" name="email" id="email" placeholder="กรอกอีเมล" class="form-control" value="<?= isset($_POST['email']) ? htmlspecialchars($_POST['email']) : '' ?>">
                                     <label for="email">อีเมล</label>
                                 </div>
                             </div>
                             <div class="col-12 col-md-6 mb-3">
                                 <div class="form-floating">
-                                    <input type="password" name="password" id="password" placeholder="กรอกรหัสผ่าน" class="form-control" required minlength="6">
+                                    <input type="password" name="password" id="password" placeholder="กรอกรหัสผ่าน" class="form-control">
                                     <label for="password">รหัสผ่าน</label>
                                 </div>
                             </div>
                             <div class="col-12 col-md-6 mb-3">
                                 <div class="form-floating">
-                                    <input type="password" name="confirm_pass" id="confirm_pass" placeholder="ยืนยันรหัส" class="form-control" required minlength="6">
+                                    <input type="password" name="confirm_pass" id="confirm_pass" placeholder="ยืนยันรหัส" class="form-control">
                                     <label for="confirm_pass">ยืนยันรหัสผ่าน</label>
                                 </div>
                             </div>
