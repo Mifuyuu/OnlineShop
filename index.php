@@ -93,7 +93,11 @@ $categories = $stmt_categories->fetchAll(PDO::FETCH_ASSOC);
             letter-spacing: 0.5px;
             transition: all 0.3s ease;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
+            border: 2px solid #667eea;
+            min-height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .btn-primary:hover {
@@ -109,6 +113,10 @@ $categories = $stmt_categories->fetchAll(PDO::FETCH_ASSOC);
             transition: all 0.3s ease;
             border: 2px solid #667eea;
             color: #667eea;
+            min-height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .btn-outline-primary:hover {
