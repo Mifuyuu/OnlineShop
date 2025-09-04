@@ -1,22 +1,32 @@
 <?php
 session_start();
-require_once 'config.php';
+
+require_once 'config.php'; //เชื่อมต่อฐานข้อมูล
 
 // ดึงข้อมูลสินค้าทั้งหมดพร้อมชื่อหมวดหมู่
-$sql = "SELECT p.*, c.category_name 
-        FROM products p 
-        LEFT JOIN categories c ON p.category_id = c.category_id 
-        WHERE p.stock > 0 
-        ORDER BY p.created_at DESC";
-$stmt = $conn->prepare($sql);
-$stmt->execute();
+// $sql = "SELECT p.*, c.category_name 
+//         FROM products p 
+//         LEFT JOIN categories c ON p.category_id = c.category_id 
+//         WHERE p.stock > 0 
+//         ORDER BY p.created_at DESC";
+// $stmt = $conn->prepare($sql);
+// $stmt->execute();
+// $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$stmt = $conn->query("SELECT p.*, c.category_name
+FROM products p
+LEFT JOIN categories c ON p.category_id = c.category_id
+ORDER BY p.created_at DESC");
 $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // ดึงข้อมูลหมวดหมู่สำหรับ filter
-$sql_categories = "SELECT * FROM categories ORDER BY category_name";
-$stmt_categories = $conn->prepare($sql_categories);
-$stmt_categories->execute();
-$categories = $stmt_categories->fetchAll(PDO::FETCH_ASSOC);
+// $sql_categories = "SELECT * FROM categories ORDER BY category_name";
+// $stmt_categories = $conn->prepare($sql_categories);
+// $stmt_categories->execute();
+// $categories = $stmt_categories->fetchAll(PDO::FETCH_ASSOC);
+
+$sql_categories = $conn->query("SELECT * FROM categories ORDER BY category_name");
+$categories = $sql_categories->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -193,12 +203,22 @@ $categories = $stmt_categories->fetchAll(PDO::FETCH_ASSOC);
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav ms-auto gap-2">
                     <?php if (isset($_SESSION['user_id'])): ?>
-                        <li class="nav-item d-flex">
-                            <span class="navbar-text welcome-text me-3">
+                        <li class="nav-item d-flex justify-content-center align-items-center">
+                            <span class=" welcome-text me-3 ">
                                 สวัสดี, <?= htmlspecialchars($_SESSION['username']) ?> (<?= $_SESSION['role'] ?>)
                             </span>
+                        </li>
+                        <li class="nav-item d-flex">
+                            <a class="btn btn-outline-primary btn-sm border border-0" href="profile.php">
+                                <i class="fa-solid fa-user fa-2x"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item d-flex">
+                            <a class="btn btn-outline-primary btn-sm border border-0" href="cart.php">
+                                <i class="fa-solid fa-cart-shopping fa-2x"></i>
+                            </a>
                         </li>
                         <li class="nav-item">
                             <a class="btn btn-outline-primary btn-sm" href="logout.php">
@@ -259,7 +279,7 @@ $categories = $stmt_categories->fetchAll(PDO::FETCH_ASSOC);
                     </div>
                 <?php else: ?>
                     <?php foreach ($products as $product): ?>
-                        <div class="col-lg-3 col-md-4 col-sm-6 mb-4" data-category="<?= $product['category_id'] ?>">
+                        <div class="col-lg-4 col-md-6 col-sm-6 mb-4" data-category="<?= $product['category_id'] ?>">
                             <div class="card product-card">
                                 <div class="product-image">
                                     <i class="fas fa-box"></i>
@@ -267,7 +287,7 @@ $categories = $stmt_categories->fetchAll(PDO::FETCH_ASSOC);
                                 <div class="card-body">
                                     <h6 class="card-title"><?= htmlspecialchars($product['product_name']) ?></h6>
                                     <p class="card-text text-muted small">
-                                        <?= htmlspecialchars($product['description']) ?>
+                                        <?= nl2br(htmlspecialchars($product['description'])) ?>
                                     </p>
                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                         <span class="price-tag">฿<?= number_format($product['price'], 2) ?></span>
@@ -280,15 +300,24 @@ $categories = $stmt_categories->fetchAll(PDO::FETCH_ASSOC);
                                             <i class="fas fa-tag me-1"></i>
                                             <?= htmlspecialchars($product['category_name']) ?>
                                         </small>
-                                        <?php if (isset($_SESSION['user_id'])): ?>
-                                            <button class="btn btn-primary btn-sm">
-                                                <i class="fas fa-cart-plus me-1"></i>เพิ่ม
-                                            </button>
-                                        <?php else: ?>
-                                            <a href="login.php" class="btn btn-outline-primary btn-sm">
-                                                <i class="fas fa-sign-in-alt me-1"></i>เข้าสู่ระบบ
-                                            </a>
-                                        <?php endif; ?>
+
+                                        <div class="d-flex flex-column gap-2 align-items-end">
+                                            <?php if (isset($_SESSION['user_id'])): ?>
+                                                <form action="cart.php" method="post" class="d-inline">
+                                                    <input type="hidden" name="quantity" value="1">
+                                                    <input type="hidden" name="product_id" value="<?= $product['product_id'] ?>">
+                                                <button type="submit" class="btn btn-primary btn-sm">
+                                                    <i class="fas fa-cart-plus me-1"></i>เพิ่ม
+                                                </button>
+                                                </form>
+                                            <?php else: ?>
+                                                <a href="login.php" class="btn btn-outline-primary btn-sm">
+                                                    <i class="fas fa-sign-in-alt me-1"></i>เข้าสู่ระบบ
+                                                </a>
+                                            <?php endif; ?>
+                                            <a href="product_detail.php?id=<?= $product['product_id'] ?>" class="btn btn-sm btn-outline-primary floatend">ดูรายละเอียด</a>
+                                        </div>
+                                        
                                     </div>
                                 </div>
                             </div>
