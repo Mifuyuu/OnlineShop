@@ -40,156 +40,7 @@ $categories = $sql_categories->fetchAll(PDO::FETCH_ASSOC);
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="assets/font/LINESeedSansTH.css">
-    <style>
-        body {
-            background-image: url('assets/img/background.png');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            min-height: 100vh;
-            font-family: 'LINE Seed Sans TH', 'Segoe UI', Verdana, sans-serif;
-        }
-
-        .navbar {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .navbar-brand {
-            font-weight: 700;
-            color: #2c3e50 !important;
-            font-family: 'LINE Seed Sans TH', sans-serif;
-        }
-
-        .main-container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            margin-top: 20px;
-            margin-bottom: 20px;
-        }
-
-        .product-card {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            transition: all 0.3s ease;
-            height: 100%;
-        }
-
-        .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-        }
-
-        .product-image {
-            height: 200px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 12px 12px 0 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 3rem;
-        }
-
-        .btn-primary {
-            border-radius: 10px;
-            padding: 8px 20px;
-            font-weight: 500;
-            letter-spacing: 0.5px;
-            transition: all 0.3s ease;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: 2px solid #667eea;
-            min-height: 36px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-outline-primary {
-            border-radius: 10px;
-            padding: 8px 20px;
-            font-weight: 500;
-            letter-spacing: 0.5px;
-            transition: all 0.3s ease;
-            border: 2px solid #667eea;
-            color: #667eea;
-            min-height: 36px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .btn-outline-primary:hover {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-color: #667eea;
-            transform: translateY(-2px);
-        }
-
-        .btn-outline-primary.active {
-            background: linear-gradient(135deg, #5c4fd6ff 0%, rgba(137, 89, 182, 1) 100%);
-            border-color: #667eea;
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(68, 84, 173, 0.4);
-        }
-
-        .category-filter {
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-
-        .price-tag {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: #e74c3c;
-        }
-
-        .stock-badge {
-            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-            color: white;
-            padding: 4px 8px;
-            border-radius: 5px;
-            font-size: 0.8rem;
-        }
-
-        .page-title {
-            color: #2c3e50;
-            font-weight: 700;
-            margin-bottom: 30px;
-            text-align: center;
-            font-family: 'LINE Seed Sans TH', sans-serif;
-        }
-
-        .welcome-text {
-            color: #495057;
-            font-weight: 500;
-            font-family: 'LINE Seed Sans TH', sans-serif;
-        }
-
-        @media (max-width: 768px) {
-            .main-container {
-                margin: 10px;
-                padding: 15px !important;
-            }
-            
-            .product-image {
-                height: 150px;
-                font-size: 2rem;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="assets/css/custom.css">
 </head>
 
 <body>
@@ -289,35 +140,40 @@ $categories = $sql_categories->fetchAll(PDO::FETCH_ASSOC);
                                     <p class="card-text text-muted small">
                                         <?= nl2br(htmlspecialchars($product['description'])) ?>
                                     </p>
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
                                         <span class="price-tag">฿<?= number_format($product['price'], 2) ?></span>
                                         <span class="stock-badge">
                                             <i class="fas fa-cubes me-1"></i><?= $product['stock'] ?> ชิ้น
                                         </span>
                                     </div>
-                                    <div class="d-flex justify-content-between align-items-center">
+                                    
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
                                         <small class="text-muted">
                                             <i class="fas fa-tag me-1"></i>
                                             <?= htmlspecialchars($product['category_name']) ?>
                                         </small>
+                                    </div>
 
-                                        <div class="d-flex flex-column gap-2 align-items-end">
-                                            <?php if (isset($_SESSION['user_id'])): ?>
-                                                <form action="cart.php" method="post" class="d-inline">
-                                                    <input type="hidden" name="quantity" value="1">
-                                                    <input type="hidden" name="product_id" value="<?= $product['product_id'] ?>">
-                                                <button type="submit" class="btn btn-primary btn-sm">
-                                                    <i class="fas fa-cart-plus me-1"></i>เพิ่ม
-                                                </button>
-                                                </form>
-                                            <?php else: ?>
-                                                <a href="login.php" class="btn btn-outline-primary btn-sm">
-                                                    <i class="fas fa-sign-in-alt me-1"></i>เข้าสู่ระบบ
-                                                </a>
-                                            <?php endif; ?>
-                                            <a href="product_detail.php?id=<?= $product['product_id'] ?>" class="btn btn-sm btn-outline-primary floatend">ดูรายละเอียด</a>
-                                        </div>
+                                    <!-- Action Buttons -->
+                                    <div class="d-grid gap-2">
+                                        <a href="product_detail.php?id=<?= $product['product_id'] ?>" 
+                                           class="btn btn-outline-primary">
+                                            <i class="fas fa-eye me-2"></i>ดูรายละเอียด
+                                        </a>
                                         
+                                        <?php if (isset($_SESSION['user_id'])): ?>
+                                            <form action="cart.php" method="post">
+                                                <input type="hidden" name="quantity" value="1">
+                                                <input type="hidden" name="product_id" value="<?= $product['product_id'] ?>">
+                                                <button type="submit" class="btn btn-primary w-100">
+                                                    <i class="fas fa-cart-plus me-2"></i>เพิ่มในตะกร้า
+                                                </button>
+                                            </form>
+                                        <?php else: ?>
+                                            <a href="login.php" class="btn btn-success">
+                                                <i class="fas fa-sign-in-alt me-2"></i>เข้าสู่ระบบเพื่อซื้อ
+                                            </a>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
