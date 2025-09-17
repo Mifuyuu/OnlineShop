@@ -1,2 +1,4 @@
 .DS_Store
 .github
+.playwright-mcp
+.kiro
