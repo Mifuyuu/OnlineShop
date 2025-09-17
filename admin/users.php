@@ -119,12 +119,12 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                                     <a href="edit_users.php?id=<?= $user['user_id'] ?>"
                                                         class="btn btn-warning btn-sm"
                                                         title="แก้ไขข้อมูล">
-                                                        <i class="fas fa-edit"></i>
+                                                        <i class="fas fa-edit"></i> แก้ไข
                                                     </a>
 
                                                     <form action="del_users.php" method="POST" style="display:inline;">
                                                         <input type="hidden" name="u_id" value="<?php echo $user['user_id']; ?>">
-                                                        <button type="button" class="delete-button btn btn-danger btn-sm" data-user-id="<?php echo $user['user_id']; ?>"><i class="fas fa-trash"></i></button>
+                                                        <button type="button" class="delete-button btn btn-danger btn-sm" data-user-id="<?php echo $user['user_id']; ?>"><i class="fas fa-trash"></i> ลบ</button>
                                                     </form>
                                                     <!-- <a href="users.php?delete=< ?= $user['user_id'] ?>"
                                                         class="btn btn-sm btn-danger"

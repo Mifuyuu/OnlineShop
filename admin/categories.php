@@ -74,58 +74,128 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY category_id ASC")-
 
 <head>
     <meta charset="UTF-8">
-    <title>OnlineShop - Category</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>จัดการหมวดหมู่สินค้า - OnlineShop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="../assets/font/LINESeedSansTH.css">
+    <link rel="stylesheet" href="../assets/css/custom.css">
 </head>
 
-<body class="container mt-4">
-    <h2>จัดการหมวดหมู่สินค้า</h2>
-    <?php if (isset($_SESSION['error'])): ?>
-        <div class="alert alert-danger"><?= $_SESSION['error'] ?></div>
-        <?php unset($_SESSION['error']); ?>
-    <?php endif; ?>
-    <?php if (isset($_SESSION['success'])): ?>
-        <div class="alert alert-success"><?= $_SESSION['success'] ?></div>
-        <?php unset($_SESSION['success']); ?>
-    <?php endif; ?>
-    <a href="index.php" class="btn btn-secondary mb-3">← กลับหน้าผู้ดูแล</a>
-    <form method="post" class="row g-3 mb-4">
-        <div class="col-md-6">
-            <input type="text" name="category_name" class="form-control" placeholder="ชื่อหมวดหมู่ใหม่" required>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="../index.php">
+                <i class="fas fa-store me-2"></i>OnlineShop
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text text-danger fw-bold">
+                    <i class="fas fa-crown me-2"></i>Admin Panel
+                </span>
+            </div>
         </div>
-        <div class="col-md-2">
-            <button type="submit" name="add_category" class="btn btn-primary">เพิ่มหมวดหมู่</button>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="main-container p-4 p-md-5">
+            <h1 class="page-title">
+                <i class="fas fa-tags me-2"></i>จัดการหมวดหมู่สินค้า
+            </h1>
+            
+            <?php if (isset($_SESSION['error'])): ?>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i><?= $_SESSION['error'] ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                <?php unset($_SESSION['error']); ?>
+            <?php endif; ?>
+            <?php if (isset($_SESSION['success'])): ?>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i><?= $_SESSION['success'] ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                <?php unset($_SESSION['success']); ?>
+            <?php endif; ?>
+            
+            <div class="row mb-4">
+                <div class="col-12">
+                    <a href="index.php" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>กลับหน้าผู้ดูแล
+                    </a>
+                </div>
+            </div>
+
+            <!-- ฟอร์มเพิ่มหมวดหมู่ -->
+            <div class="admin-card mb-4">
+                <h5 class="mb-3">
+                    <i class="fas fa-plus-circle me-2"></i>เพิ่มหมวดหมู่ใหม่
+                </h5>
+                <form method="post" class="row g-3">
+                    <div class="col-md-8">
+                        <input type="text" name="category_name" class="form-control" placeholder="ชื่อหมวดหมู่ใหม่" required>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" name="add_category" class="btn btn-primary w-100">
+                            <i class="fas fa-plus me-2"></i>เพิ่มหมวดหมู่
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- รายการหมวดหมู่ -->
+            <div class="table-container">
+                <h5 class="p-3 mb-0 border-bottom">
+                    <i class="fas fa-list me-2"></i>รายการหมวดหมู่
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col">
+                                    <i class="fas fa-tag me-2"></i>ชื่อหมวดหมู่
+                                </th>
+                                <th scope="col">
+                                    <i class="fas fa-edit me-2"></i>แก้ไขชื่อ
+                                </th>
+                                <th scope="col" class="text-center">
+                                    <i class="fas fa-cogs me-2"></i>จัดการ
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($categories as $cat): ?>
+                                <tr>
+                                    <td class="align-middle">
+                                        <span class="fw-semibold"><?= htmlspecialchars($cat['category_name']) ?></span>
+                                    </td>
+                                    <td>
+                                        <form method="post" class="d-flex gap-2">
+                                            <input type="hidden" name="category_id" value="<?= $cat['category_id'] ?>">
+                                            <input type="text" name="new_name" class="form-control form-control-sm" 
+                                                   placeholder="ชื่อใหม่" required>
+                                            <button type="submit" name="update_category" class="btn btn-warning btn-sm">
+                                                <i class="fas fa-save me-1"></i>แก้ไข
+                                            </button>
+                                        </form>
+                                    </td>
+                                    <td class="text-center">
+                                        <a href="categories.php?delete=<?= $cat['category_id'] ?>" 
+                                           class="btn btn-danger btn-sm"
+                                           onclick="return confirm('คุณต้องการลบหมวดหมู่นี้หรือไม่?')">
+                                            <i class="fas fa-trash me-1"></i>ลบ
+                                        </a>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-    </form>
-    <h5>รายการหมวดหมู่</h5>
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>ชื่อหมวดหมู่</th>
-                <th>แก้ไขชื่อ</th>
-                <th>จัดการ</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($categories as $cat): ?>
-                <tr>
-                    <td><?= htmlspecialchars($cat['category_name']) ?></td>
-                    <td>
-                        <form method="post" class="d-flex">
-                            <input type="hidden" name="category_id" value="<?= $cat['category_id'] ?>">
-                            <input type="text" name="new_name" class="form-control me-2" placeholder="ชื่อใหม่"
-                                required>
-                            <button type="submit" name="update_category" class="btn btn-sm btn-warning">แก้ไข
-                        </form>
-                    </td>
-                    <td>
-                        <a href="categories.php?delete=<?= $cat['category_id'] ?>" class="btn btn-sm btn-danger"
-                            onclick="return confirm('คุณต้องการลบหมวดหมู่นี้หรือไม่?')">ลบ</a>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+    </div>
 </body>
 
 </html>
