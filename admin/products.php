@@ -12,21 +12,67 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_product'])) {
     $category_id = intval($_POST['category_id']);
     // ค่าที่ได้จากฟอร์มเป็น string เสมอ
     if ($name && $price > 0) { // ตรวจสอบชื่อ และราคาสินค้า
-        $stmt = $conn->prepare("INSERT INTO products (product_name, description, price, stock, category_id) VALUES (?, ?, ?, ?, ?)");
-        $stmt->execute([$name, $description, $price, $stock, $category_id]);
+        $imageName = null;
+
+        if (!empty($_FILES['product_image']['name'])) {
+            $file = $_FILES['product_image'];
+            $allowed = ['image/jpeg', 'image/png'];
+
+            if (in_array($file['type'], $allowed)) {
+                $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+                $imageName = 'product_' . time() . '.' . $ext;
+                $path = __DIR__ . '/../assets/img/products_imgs/' . $imageName;
+                move_uploaded_file($file['tmp_name'], $path);
+            }
+        }
+        $stmt = $conn->prepare("INSERT INTO products (product_name, description, price, stock, category_id, image) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$name, $description, $price, $stock, $category_id, $imageName]);
         header("Location: products.php");
         exit;
     }
 }
 
-// ลบสินค้า
+
+// ลบสนิ คำ้ (ลบไฟลร์ปู ดว้ย)
 if (isset($_GET['delete'])) {
-    $product_id = $_GET['delete'];
-    $stmt = $conn->prepare("DELETE FROM products WHERE product_id = ?");
+    $product_id = (int)$_GET['delete']; // แคสต์เป็น int
+    // 1) ดงึชอื่ ไฟลร์ปู จำก DB ก่อน
+    $stmt = $conn->prepare("SELECT image FROM products WHERE product_id = ?");
     $stmt->execute([$product_id]);
+    $imageName = $stmt->fetchColumn(); // null ถ ้ำไม่มีรูป
+    // 2) ลบใน DB ด ้วย Transaction
+    try {
+        $conn->beginTransaction();
+        $del = $conn->prepare("DELETE FROM products WHERE product_id = ?");
+        $del->execute([$product_id]);
+        $conn->commit();
+    } catch (Exception $e) {
+        $conn->rollBack();
+        // ใส่ flash message หรือ log ได ้ตำมต ้องกำร
+        header("Location: products.php");
+        exit;
+    }
+    // 3) ลบไฟล์รูปหลัง DB ลบส ำเร็จ
+    if ($imageName) {
+        $baseDir = realpath(__DIR__ . '/../assets/img/products_imgs'); // โฟลเดอร์เก็บรูป
+        $filePath = realpath($baseDir . '/' . $imageName);
+        // กัน path traversal: ต ้องอยู่ใต้ $baseDir จริง ๆ
+        if ($filePath && strpos($filePath, $baseDir) === 0 && is_file($filePath)) {
+            @unlink($filePath); // ใช ้@ กัน warning ถำ้ลบไมส่ ำเร็จ
+        }
+    }
     header("Location: products.php");
     exit;
 }
+
+// ลบสินค้า
+// if (isset($_GET['delete'])) {
+//     $product_id = $_GET['delete'];
+//     $stmt = $conn->prepare("DELETE FROM products WHERE product_id = ?");
+//     $stmt->execute([$product_id]);
+//     header("Location: products.php");
+//     exit;
+// }
 
 // ดึงรายการสินค้า
 $stmt = $conn->query("SELECT p.*, c.category_name FROM products p LEFT JOIN categories c ON p.category_id = c.category_id ORDER BY p.created_at DESC");
@@ -70,7 +116,7 @@ $categories = $conn->query("SELECT * FROM categories")->fetchAll(PDO::FETCH_ASSO
             <h1 class="page-title">
                 <i class="fas fa-box me-2"></i>จัดการสินค้า
             </h1>
-            
+
             <div class="row mb-4">
                 <div class="col-12">
                     <a href="index.php" class="btn btn-secondary">
@@ -78,13 +124,13 @@ $categories = $conn->query("SELECT * FROM categories")->fetchAll(PDO::FETCH_ASSO
                     </a>
                 </div>
             </div>
-            
+
             <!-- ฟอร์มเพิ่มสินค้าใหม่ -->
             <div class="admin-card mb-4">
                 <h5 class="mb-3">
                     <i class="fas fa-plus-circle me-2"></i>เพิ่มสินค้าใหม่
                 </h5>
-                <form method="post" class="row g-3">
+                <form method="post" class="row g-3" enctype="multipart/form-data">
                     <div class="col-md-3">
                         <label class="form-label">ชื่อสินค้า</label>
                         <input type="text" name="product_name" class="form-control" placeholder="ชื่อสินค้า" required>
@@ -115,6 +161,10 @@ $categories = $conn->query("SELECT * FROM categories")->fetchAll(PDO::FETCH_ASSO
                         <label class="form-label">รายละเอียดสินค้า</label>
                         <textarea name="description" class="form-control" placeholder="รายละเอียดสินค้า" rows="3"></textarea>
                     </div>
+                    <div class="col-12">
+                        <label class="form-label">รูปสินค้า (jpg, png)</label>
+                        <input type="file" name="product_image" class="form-control" rows="3"></input>
+                    </div>
                 </form>
             </div>
 
@@ -138,6 +188,9 @@ $categories = $conn->query("SELECT * FROM categories")->fetchAll(PDO::FETCH_ASSO
                                 </th>
                                 <th scope="col">
                                     <i class="fas fa-warehouse me-2"></i>คงเหลือ
+                                </th>
+                                <th scope="col">
+                                    <i class="fas fa-image me-2"></i>ภาพสินค้า
                                 </th>
                                 <th scope="col" class="text-center">
                                     <i class="fas fa-cogs me-2"></i>จัดการ
@@ -168,15 +221,23 @@ $categories = $conn->query("SELECT * FROM categories")->fetchAll(PDO::FETCH_ASSO
                                             <span class="badge bg-danger">หมด</span>
                                         <?php endif; ?>
                                     </td>
+                                    <td>
+                                        <?php if ($p['image']): ?>
+                                            <img src="../assets/img/products_imgs/<?= htmlspecialchars($p['image']) ?>" width="60" height="60"
+                                                class="rounded object-fit-cover">
+                                        <?php else: ?>
+                                            <img src="../assets/img/products_imgs/no_images.png" width="60" height="60">
+                                        <?php endif; ?>
+                                    </td>
                                     <td class="text-center">
                                         <div class="btn-group" role="group">
-                                            <a href="edit_product.php?id=<?= $p['product_id'] ?>" 
-                                               class="btn btn-warning btn-sm">
+                                            <a href="edit_products.php?id=<?= $p['product_id'] ?>"
+                                                class="btn btn-warning btn-sm d-flex justify-content-center align-items-center">
                                                 <i class="fas fa-edit me-1"></i>แก้ไข
                                             </a>
-                                            <a href="products.php?delete=<?= $p['product_id'] ?>" 
-                                               class="btn btn-danger btn-sm"
-                                               onclick="return confirm('ยืนยันการลบสินค้านี้?')">
+                                            <a href="products.php?delete=<?= $p['product_id'] ?>"
+                                                class="btn btn-danger btn-sm d-flex justify-content-center align-items-center"
+                                                onclick="return confirm('ยืนยันการลบสินค้านี้?')">
                                                 <i class="fas fa-trash me-1"></i>ลบ
                                             </a>
                                         </div>

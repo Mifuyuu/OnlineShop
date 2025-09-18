@@ -19,6 +19,19 @@ if (!$product) {
     echo "<h3>ไม่พบสินค้าที่คุณต้องการ</h3>";
     exit;
 }
+
+// เตรียมรูปภาพ
+$img = !empty($product['image'])
+    ? 'assets/img/products_imgs/' . rawurlencode($product['image'])
+    : 'assets/img/products_imgs/no_images.png';
+
+// ตกแต่ง badge: NEW ภายใน 7 วัน / HOT ถ้าสต็อกน้อยกว่า 5
+$isNew = isset($product['created_at']) && (time() - strtotime($product['created_at']) <= 7 * 24 * 3600);
+$isHot = (int)$product['stock'] > 0 && (int)$product['stock'] < 5;
+// ดาวรีวิว (ถ้าไม่มีใน DB จะโชว์ 4.5 จำลอง; ถ้ามี $product['rating'] ให้แทน)
+$rating = isset($product['rating']) ? (float)$product['rating'] : 4.5;
+$full = floor($rating); // จำนวนดาวเต็ม (เต็ม 1 ดวง) , floor ปัดลง
+$half = ($rating - $full) >= 0.5 ? 1 : 0; // มีดาวครึ่งดวงหรือไม่
 ?>
 
 <!DOCTYPE html>
@@ -36,6 +49,10 @@ if (!$product) {
     <style>
         /* Product detail specific styles */
         .product-image-large {
+            height: 300px;
+        }
+        
+        .product-has-image {
             height: 300px;
         }
         
@@ -113,8 +130,31 @@ if (!$product) {
             <div class="product-detail-card p-4">
                 <div class="row">
                     <div class="col-md-6 mb-4">
-                        <div class="product-image-large">
-                            <i class="fas fa-box"></i>
+                        <!-- Product Image with Badges -->
+                        <div class="position-relative">
+                            <?php if (!empty($product['image'])): ?>
+                                <div class="product-has-image overflow-hidden">
+                                    <img src="<?= htmlspecialchars($img) ?>" class="w-100 h-100 object-fit-cover rounded" alt="<?= htmlspecialchars($product['product_name']) ?>">
+                                </div>
+                            <?php else: ?>
+                                <div class="product-image-large d-flex align-items-center justify-content-center bg-light rounded">
+                                    <i class="fas fa-box fa-4x text-muted"></i>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <!-- Badges -->
+                            <div class="position-absolute top-0 start-0 p-3">
+                                <?php if ($isNew): ?>
+                                    <span class="badge bg-success me-2 mb-1" style="font-size: 0.9rem;">
+                                        <i class="fas fa-star me-1"></i>NEW
+                                    </span>
+                                <?php endif; ?>
+                                <?php if ($isHot): ?>
+                                    <span class="badge bg-danger" style="font-size: 0.9rem;">
+                                        <i class="fas fa-fire me-1"></i>HOT
+                                    </span>
+                                <?php endif; ?>
+                            </div>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -128,6 +168,24 @@ if (!$product) {
                             </span>
                         </div>
 
+                        <!-- Star Rating -->
+                        <div class="mb-4">
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    <?php for ($i = 1; $i <= 5; $i++): ?>
+                                        <?php if ($i <= $full): ?>
+                                            <i class="fas fa-star text-warning fs-5"></i>
+                                        <?php elseif ($i == $full + 1 && $half): ?>
+                                            <i class="fas fa-star-half-alt text-warning fs-5"></i>
+                                        <?php else: ?>
+                                            <i class="far fa-star text-muted fs-5"></i>
+                                        <?php endif; ?>
+                                    <?php endfor; ?>
+                                </div>
+                                <span class="text-muted h6 mb-0">(<?= number_format($rating, 1) ?> ดาว)</span>
+                            </div>
+                        </div>
+
                         <div class="mb-4">
                             <p class="text-muted lead"><?= nl2br(htmlspecialchars($product['description']))?></p>
                         </div>
@@ -135,7 +193,7 @@ if (!$product) {
                         <div class="row mb-4">
                             <div class="col-6">
                                 <div class="d-flex align-items-center">
-                                    <i class="fas fa-baht-sign me-2 text-danger"></i>
+                                    <!-- <i class="fas fa-baht-sign me-2 text-danger"></i> -->
                                     <span class="price-tag-large">฿<?= number_format($product['price'], 2)?></span>
                                 </div>
                             </div>

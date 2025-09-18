@@ -111,8 +111,8 @@ $categories = $sql_categories->fetchAll(PDO::FETCH_ASSOC);
                     </div>
                     <?php foreach ($categories as $category): ?>
                         <div class="col-auto mb-2">
-                            <button class="btn btn-outline-primary btn-sm" 
-                                    onclick="filterProducts('<?= $category['category_id'] ?>')">
+                            <button class="btn btn-outline-primary btn-sm"
+                                onclick="filterProducts('<?= $category['category_id'] ?>')">
                                 <?= htmlspecialchars($category['category_name']) ?>
                             </button>
                         </div>
@@ -130,10 +130,49 @@ $categories = $sql_categories->fetchAll(PDO::FETCH_ASSOC);
                     </div>
                 <?php else: ?>
                     <?php foreach ($products as $product): ?>
+
+                        <!-- TODO==== เตรียมรูป / ตกแต่ง badge / ดำวรีวิว ==== -->
+                        <?php
+                        // เตรียมรูป
+                        $img = !empty($product['image'])
+                            ? 'assets/img/products_imgs/' . rawurlencode($product['image'])
+                            : 'assets/img/products_imgs/no_images.png';
+                        // ตกแต่ง badge: NEW ภำยใน 7 วัน / HOT ถ ้ำสต็อกน้อยกว่ำ 5
+                        $isNew = isset($product['created_at']) && (time() - strtotime($product['created_at']) <= 7 * 24 * 3600);
+                        $isHot = (int)$product['stock'] > 0 && (int)$product['stock'] < 5;
+                        // ดำวรีวิว (ถ ้ำไม่มีใน DB จะโชว์ 4.5 จ ำลอง; ถ ้ำมี $p['rating'] ให้แทน)
+                        $rating = isset($product['rating']) ? (float)$product['rating'] : 4.5;
+                        $full = floor($rating); // จ ำนวนดำวเต็ม (เต็ม 1 ดวง) , floor ปัดลง
+                        $half = ($rating - $full) >= 0.5 ? 1 : 0; // มีดำวครึ่งดวงหรือไม่
+                        ?>
+
                         <div class="col-lg-4 col-md-6 col-sm-6 mb-4" data-category="<?= $product['category_id'] ?>">
                             <div class="card product-card">
-                                <div class="product-image">
-                                    <i class="fas fa-box"></i>
+                                <!-- Product Image with Badges -->
+                                <div class="position-relative">
+                                    <?php if (!empty($product['image'])): ?>
+                                        <div class="product-has-image overflow-hidden">
+                                            <img src="<?= htmlspecialchars($img) ?>" class=" w-100">
+                                        </div>
+                                    <?php else: ?>
+                                        <div class="product-image">
+                                            <i class="fas fa-box"></i>
+                                        </div>
+                                    <?php endif; ?>
+                                    
+                                    <!-- Badges -->
+                                    <div class="position-absolute top-0 start-0 p-2">
+                                        <?php if ($isNew): ?>
+                                            <span class="badge bg-success me-1">
+                                                <i class="fas fa-star me-1"></i>NEW
+                                            </span>
+                                        <?php endif; ?>
+                                        <?php if ($isHot): ?>
+                                            <span class="badge bg-danger">
+                                                <i class="fas fa-fire me-1"></i>HOT
+                                            </span>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
                                 <div class="card-body">
                                     <h6 class="card-title"><?= htmlspecialchars($product['product_name']) ?></h6>
@@ -146,7 +185,7 @@ $categories = $sql_categories->fetchAll(PDO::FETCH_ASSOC);
                                             <i class="fas fa-cubes me-1"></i><?= $product['stock'] ?> ชิ้น
                                         </span>
                                     </div>
-                                    
+
                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                         <small class="text-muted">
                                             <i class="fas fa-tag me-1"></i>
@@ -154,13 +193,31 @@ $categories = $sql_categories->fetchAll(PDO::FETCH_ASSOC);
                                         </small>
                                     </div>
 
+                                    <!-- Star Rating -->
+                                    <div class="mb-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-2">
+                                                <?php for ($i = 1; $i <= 5; $i++): ?>
+                                                    <?php if ($i <= $full): ?>
+                                                        <i class="fas fa-star text-warning"></i>
+                                                    <?php elseif ($i == $full + 1 && $half): ?>
+                                                        <i class="fas fa-star-half-alt text-warning"></i>
+                                                    <?php else: ?>
+                                                        <i class="far fa-star text-muted"></i>
+                                                    <?php endif; ?>
+                                                <?php endfor; ?>
+                                            </div>
+                                            <small class="text-muted">(<?= number_format($rating, 1) ?>)</small>
+                                        </div>
+                                    </div>
+
                                     <!-- Action Buttons -->
                                     <div class="d-grid gap-2">
-                                        <a href="product_detail.php?id=<?= $product['product_id'] ?>" 
-                                           class="btn btn-outline-primary">
+                                        <a href="product_detail.php?id=<?= $product['product_id'] ?>"
+                                            class="btn btn-outline-primary">
                                             <i class="fas fa-eye me-2"></i>ดูรายละเอียด
                                         </a>
-                                        
+
                                         <?php if (isset($_SESSION['user_id'])): ?>
                                             <form action="cart.php" method="post">
                                                 <input type="hidden" name="quantity" value="1">
@@ -188,11 +245,11 @@ $categories = $sql_categories->fetchAll(PDO::FETCH_ASSOC);
         function filterProducts(categoryId) {
             const products = document.querySelectorAll('[data-category]');
             const buttons = document.querySelectorAll('.category-filter .btn-outline-primary');
-            
+
             // Reset button states
             buttons.forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
-            
+
             // Filter products
             products.forEach(product => {
                 if (categoryId === 'all' || product.dataset.category === categoryId) {
