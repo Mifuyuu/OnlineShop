@@ -114,24 +114,14 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                                 <i class="fas fa-clock me-1 text-muted"></i>
                                                 <?= date('d/m/Y H:i', strtotime($user['created_at'])) ?>
                                             </td>
-                                            <td>
-                                                <div class="d-flex gap-2">
-                                                    <a href="edit_users.php?id=<?= $user['user_id'] ?>"
-                                                        class="btn btn-warning btn-sm"
-                                                        title="แก้ไขข้อมูล">
-                                                        <i class="fas fa-edit"></i> แก้ไข
+                                            <td class="text-center">
+                                                <div class="btn-group" role="group">
+                                                    <a href="edit_users.php?id=<?= $user['user_id'] ?>" class="btn btn-warning btn-sm d-flex justify-content-center align-items-center">
+                                                        <i class="fas fa-edit me-1"></i>แก้ไข
                                                     </a>
-
-                                                    <form action="del_users.php" method="POST" style="display:inline;">
-                                                        <input type="hidden" name="u_id" value="<?php echo $user['user_id']; ?>">
-                                                        <button type="button" class="delete-button btn btn-danger btn-sm" data-user-id="<?php echo $user['user_id']; ?>"><i class="fas fa-trash"></i> ลบ</button>
-                                                    </form>
-                                                    <!-- <a href="users.php?delete=< ?= $user['user_id'] ?>"
-                                                        class="btn btn-sm btn-danger"
-                                                        onclick="return confirm('คุณต้องการลบสมาชิกนี้หรือไม่?')"
-                                                        title="ลบสมาชิก">
-                                                        <i class="fas fa-trash"></i>
-                                                    </a> -->
+                                                    <button type="button" data-user-id="<?php echo $user['user_id']; ?>" class="delete-button btn btn-danger btn-sm d-flex justify-content-center align-items-center">
+                                                        <i class="fas fa-trash me-1"></i>ลบ
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -151,18 +141,20 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
         </div>
         <script>
-            // ฟังกช์ นั ส ำหรับแสดงกลอ่ งยนื ยัน SweetAlert2
+            // ฟังกชันสำหรับแสดงกล่องยืนยัน SweetAlert2
             function showDeleteConfirmation(userId) {
                 Swal.fire({
                     title: 'คุณแน่ใจหรือไม่?',
                     text: 'คุณจะไม่สามารถเรียกคืนข้อมูลกลับได้!',
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonText: 'ลบ',
+                    confirmButtonText: 'ใช่, ลบเลย!',
+                    confirmButtonColor: '#d33',
                     cancelButtonText: 'ยกเลิก',
+                    cancelButtonColor: '#6c757d'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // หำกผใู้ชย้นื ยัน ใหส้ ง่ คำ่ ฟอรม์ ไปยัง delete.php เพื่อลบข ้อมูล
+                        // หากผู้ใช้ยืนยัน ให้ส่งค่าฟอร์มไปยัง del_users.php เพื่อลบข้อมูล
                         const form = document.createElement('form');
                         form.method = 'POST';
                         form.action = 'del_users.php';
@@ -176,12 +168,16 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     }
                 });
             }
-            // แนบตัวตรวจจับเหตุกำรณ์คลิกกับองค์ปุ ่่มลบทั ่ ้งหมดที่มีคลำส delete-button
-            const deleteButtons = document.querySelectorAll('.delete-button');
-            deleteButtons.forEach((button) => {
-                button.addEventListener('click', () => {
-                    const userId = button.getAttribute('data-user-id');
-                    showDeleteConfirmation(userId);
+
+            // แนบตัวตรวจจับเหตุการณ์คลิกกับปุ่มลบทั้งหมดที่มีคลาส delete-button
+            document.addEventListener('DOMContentLoaded', function() {
+                const deleteButtons = document.querySelectorAll('.delete-button');
+                deleteButtons.forEach((button) => {
+                    button.addEventListener('click', function(e) {
+                        e.preventDefault(); // ป้องกันการส่งฟอร์มทันที
+                        const userId = this.getAttribute('data-user-id');
+                        showDeleteConfirmation(userId);
+                    });
                 });
             });
         </script>

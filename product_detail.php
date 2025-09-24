@@ -64,6 +64,12 @@ $half = ($rating - $full) >= 0.5 ? 1 : 0; // มีดาวครึ่งด�
             padding: 8px 16px;
             font-size: 1rem;
         }
+        .quantity-section {
+            background: rgba(108, 117, 125, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px dashed #6c757d;
+        }
     </style>
 </head>
 
@@ -186,8 +192,8 @@ $half = ($rating - $full) >= 0.5 ? 1 : 0; // มีดาวครึ่งด�
                             </div>
                         </div>
 
-                        <div class="mb-4">
-                            <p class="text-muted lead"><?= nl2br(htmlspecialchars($product['description']))?></p>
+                        <div class="mb-4 quantity-section">
+                            <p class="text-muted"><?= nl2br(htmlspecialchars($product['description']))?></p>
                         </div>
 
                         <div class="row mb-4">

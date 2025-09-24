@@ -93,6 +93,12 @@ $categories = $conn->query("SELECT * FROM categories")->fetchAll(PDO::FETCH_ASSO
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="../assets/font/LINESeedSansTH.css">
     <link rel="stylesheet" href="../assets/css/custom.css">
+    <style>
+        .form-select {
+            height: calc(2.375rem + 10px);
+            padding: 0.375rem 0.75rem;
+        }
+    </style>
 </head>
 
 <body>
@@ -131,7 +137,7 @@ $categories = $conn->query("SELECT * FROM categories")->fetchAll(PDO::FETCH_ASSO
                     <i class="fas fa-plus-circle me-2"></i>เพิ่มสินค้าใหม่
                 </h5>
                 <form method="post" class="row g-3" enctype="multipart/form-data">
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <label class="form-label">ชื่อสินค้า</label>
                         <input type="text" name="product_name" class="form-control" placeholder="ชื่อสินค้า" required>
                     </div>
@@ -143,7 +149,7 @@ $categories = $conn->query("SELECT * FROM categories")->fetchAll(PDO::FETCH_ASSO
                         <label class="form-label">จำนวนสต๊อก</label>
                         <input type="number" name="stock" class="form-control" placeholder="จำนวน" required>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label class="form-label">หมวดหมู่</label>
                         <select name="category_id" class="form-select" required>
                             <option value="">เลือกหมวดหมู่</option>
@@ -154,7 +160,7 @@ $categories = $conn->query("SELECT * FROM categories")->fetchAll(PDO::FETCH_ASSO
                     </div>
                     <div class="col-md-2 d-flex align-items-end">
                         <button type="submit" name="add_product" class="btn btn-primary w-100">
-                            <i class="fas fa-plus me-2"></i>เพิ่มสินค้า
+                            <i class="fas fa-plus me-2"></i>เพิ่ม
                         </button>
                     </div>
                     <div class="col-12">
