@@ -53,7 +53,8 @@ $half = ($rating - $full) >= 0.5 ? 1 : 0; // มีดาวครึ่งด�
         }
         
         .product-has-image {
-            height: 300px;
+            height: 100%;
+            /* max-height: 400px; */
         }
         
         .price-tag {

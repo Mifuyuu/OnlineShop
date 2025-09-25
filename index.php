@@ -58,7 +58,7 @@ $categories = $sql_categories->fetchAll(PDO::FETCH_ASSOC);
                     <?php if (isset($_SESSION['user_id'])): ?>
                         <li class="nav-item d-flex justify-content-center align-items-center">
                             <span class=" welcome-text me-3 ">
-                                สวัสดี, <?= htmlspecialchars($_SESSION['username']) ?> (<?= $_SESSION['role'] ?>)
+                                สวัสดี, <?= htmlspecialchars($_SESSION['fullname']) ?> (<?= $_SESSION['role'] ?>)
                             </span>
                         </li>
                         <li class="nav-item d-flex">

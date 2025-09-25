@@ -232,7 +232,7 @@ $categories = $conn->query("SELECT * FROM categories")->fetchAll(PDO::FETCH_ASSO
                                             <img src="../assets/img/products_imgs/<?= htmlspecialchars($p['image']) ?>" width="60" height="60"
                                                 class="rounded object-fit-cover">
                                         <?php else: ?>
-                                            <img src="../assets/img/products_imgs/no_images.png" width="60" height="60">
+                                            <img src="../assets/img/no_images.png" width="60" height="60">
                                         <?php endif; ?>
                                     </td>
                                     <td class="text-center">
