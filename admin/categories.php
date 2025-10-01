@@ -81,6 +81,7 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY category_id ASC")-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="../assets/font/LINESeedSansTH.css">
     <link rel="stylesheet" href="../assets/css/custom.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
@@ -182,11 +183,11 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY category_id ASC")-
                                         </form>
                                     </td>
                                     <td class="text-center">
-                                        <a href="categories.php?delete=<?= $cat['category_id'] ?>" 
-                                           class="btn btn-danger btn-sm"
-                                           onclick="return confirm('คุณต้องการลบหมวดหมู่นี้หรือไม่?')">
+                                        <button type="button" class="btn btn-danger btn-sm delete-category" 
+                                                data-id="<?= $cat['category_id'] ?>" 
+                                                data-name="<?= htmlspecialchars($cat['category_name']) ?>">
                                             <i class="fas fa-trash me-1"></i>ลบ
-                                        </a>
+                                        </button>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -196,6 +197,54 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY category_id ASC")-
             </div>
         </div>
     </div>
+    
+    <script>
+        // SweetAlert for Delete Category
+        document.querySelectorAll('.delete-category').forEach(button => {
+            button.addEventListener('click', function() {
+                const categoryId = this.getAttribute('data-id');
+                const categoryName = this.getAttribute('data-name');
+                
+                Swal.fire({
+                    title: 'ยืนยันการลบหมวดหมู่?',
+                    html: `คุณต้องการลบหมวดหมู่ <strong>${categoryName}</strong> หรือไม่?<br><small class="text-muted">หากมีสินค้าในหมวดหมู่นี้จะไม่สามารถลบได้</small>`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'ใช่, ลบเลย!',
+                    cancelButtonText: 'ยกเลิก',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = `categories.php?delete=${categoryId}`;
+                    }
+                });
+            });
+        });
+        
+        // SweetAlert for Add/Update Success
+        <?php if (isset($_SESSION['success'])): ?>
+            Swal.fire({
+                icon: 'success',
+                title: 'สำเร็จ!',
+                text: '<?= $_SESSION['success'] ?>',
+                showConfirmButton: false,
+                timer: 2000
+            });
+            <?php unset($_SESSION['success']); ?>
+        <?php endif; ?>
+        
+        <?php if (isset($_SESSION['error'])): ?>
+            Swal.fire({
+                icon: 'error',
+                title: 'เกิดข้อผิดพลาด!',
+                text: '<?= $_SESSION['error'] ?>',
+                confirmButtonColor: '#667eea'
+            });
+            <?php unset($_SESSION['error']); ?>
+        <?php endif; ?>
+    </script>
 </body>
 
 </html>

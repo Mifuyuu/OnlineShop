@@ -91,6 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="../assets/font/LINESeedSansTH.css">
     <link rel="stylesheet" href="../assets/css/custom.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
@@ -200,7 +201,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     
                     <div class="col-12">
                         <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-primary" id="saveProductBtn">
                                 <i class="fas fa-save me-2"></i>บันทึกการแก้ไข
                             </button>
                             <a href="products.php" class="btn btn-outline-secondary">
@@ -295,4 +296,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             box-shadow: 0 8px 25px rgba(108, 117, 125, 0.3);
         }
     </style>
+    
+    <script>
+        // SweetAlert for Save Confirmation
+        document.getElementById('saveProductBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            Swal.fire({
+                title: 'ยืนยันการบันทึก?',
+                text: 'คุณต้องการบันทึกการแก้ไขสินค้านี้หรือไม่?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#667eea',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'บันทึก',
+                cancelButtonText: 'ยกเลิก',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Submit form
+                    e.target.closest('form').submit();
+                }
+            });
+        });
+    </script>
 </body>

@@ -61,6 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="../assets/font/LINESeedSansTH.css">
     <link rel="stylesheet" href="../assets/css/custom.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
     <!-- Navigation Bar -->
@@ -162,7 +163,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <h6 class="gradient-text mb-3">
                                         <i class="fas fa-edit me-2"></i>อัปเดตสถานะคำสั่งซื้อ
                                     </h6>
-                                    <form method="post" class="row g-2">
+                                    <form method="post" class="row g-2" id="orderForm<?= $index ?>">
                                         <input type="hidden" name="order_id" value="<?= $order['order_id'] ?>">
                                         <div class="col-md-8">
                                             <select name="status" class="form-select">
@@ -182,7 +183,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             </select>
                                         </div>
                                         <div class="col-md-4">
-                                            <button type="submit" name="update_status" class="btn btn-primary w-100">
+                                            <button type="button" class="btn btn-primary w-100 update-order-status" data-form="orderForm<?= $index ?>">
                                                 <i class="fas fa-save me-1"></i>อัปเดตสถานะ
                                             </button>
                                         </div>
@@ -220,7 +221,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                 </span>
                                             </div>
                                         </div>
-                                        <form method="post" class="row g-2">
+                                        <form method="post" class="row g-2" id="shippingForm<?= $index ?>">
                                             <input type="hidden" name="shipping_id" value="<?= $shipping['shipping_id'] ?>">
                                             <div class="col-md-8">
                                                 <select name="shipping_status" class="form-select">
@@ -238,7 +239,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                 </select>
                                             </div>
                                             <div class="col-md-4">
-                                                <button type="submit" name="update_shipping" class="btn btn-success w-100">
+                                                <button type="button" class="btn btn-success w-100 update-shipping-status" data-form="shippingForm<?= $index ?>">
                                                     <i class="fas fa-truck me-1"></i>อัปเดตการจัดส่ง
                                                 </button>
                                             </div>
@@ -252,5 +253,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </div>
     </div>
+    
+    <script>
+        // SweetAlert for Update Order Status
+        document.querySelectorAll('.update-order-status').forEach(button => {
+            button.addEventListener('click', function() {
+                const formId = this.getAttribute('data-form');
+                const form = document.getElementById(formId);
+                const status = form.querySelector('select[name="status"]').value;
+                
+                Swal.fire({
+                    title: 'ยืนยันการอัปเดตสถานะ?',
+                    html: `คุณต้องการเปลี่ยนสถานะคำสั่งซื้อเป็น <strong>${status}</strong> หรือไม่?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#667eea',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'ยืนยัน',
+                    cancelButtonText: 'ยกเลิก',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+        
+        // SweetAlert for Update Shipping Status
+        document.querySelectorAll('.update-shipping-status').forEach(button => {
+            button.addEventListener('click', function() {
+                const formId = this.getAttribute('data-form');
+                const form = document.getElementById(formId);
+                const status = form.querySelector('select[name="shipping_status"]').value;
+                
+                Swal.fire({
+                    title: 'ยืนยันการอัปเดตการจัดส่ง?',
+                    html: `คุณต้องการเปลี่ยนสถานะการจัดส่งเป็น <strong>${status}</strong> หรือไม่?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#28a745',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'ยืนยัน',
+                    cancelButtonText: 'ยกเลิก',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>

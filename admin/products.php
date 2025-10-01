@@ -93,6 +93,7 @@ $categories = $conn->query("SELECT * FROM categories")->fetchAll(PDO::FETCH_ASSO
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="../assets/font/LINESeedSansTH.css">
     <link rel="stylesheet" href="../assets/css/custom.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         .form-select {
             height: calc(2.375rem + 10px);
@@ -241,11 +242,11 @@ $categories = $conn->query("SELECT * FROM categories")->fetchAll(PDO::FETCH_ASSO
                                                 class="btn btn-warning btn-sm d-flex justify-content-center align-items-center">
                                                 <i class="fas fa-edit me-1"></i>แก้ไข
                                             </a>
-                                            <a href="products.php?delete=<?= $p['product_id'] ?>"
-                                                class="btn btn-danger btn-sm d-flex justify-content-center align-items-center"
-                                                onclick="return confirm('ยืนยันการลบสินค้านี้?')">
+                                            <button type="button" class="btn btn-danger btn-sm d-flex justify-content-center align-items-center delete-product"
+                                                    data-id="<?= $p['product_id'] ?>" 
+                                                    data-name="<?= htmlspecialchars($p['product_name']) ?>">
                                                 <i class="fas fa-trash me-1"></i>ลบ
-                                            </a>
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -256,6 +257,39 @@ $categories = $conn->query("SELECT * FROM categories")->fetchAll(PDO::FETCH_ASSO
             </div>
         </div>
     </div>
+    
+    <script>
+        // SweetAlert for Delete Product
+        document.querySelectorAll('.delete-product').forEach(button => {
+            button.addEventListener('click', function() {
+                const productId = this.getAttribute('data-id');
+                const productName = this.getAttribute('data-name');
+                
+                Swal.fire({
+                    title: 'ยืนยันการลบสินค้า?',
+                    html: `คุณต้องการลบสินค้า <strong>${productName}</strong> หรือไม่?<br><small class="text-danger">การลบจะไม่สามารถกู้คืนได้!</small>`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'ใช่, ลบเลย!',
+                    cancelButtonText: 'ยกเลิก',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: 'กำลังลบสินค้า...',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+                        window.location.href = `products.php?delete=${productId}`;
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>
